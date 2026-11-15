@@ -1,26 +1,480 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Atelier design system
+   Quiet, editorial, apothecary-inspired. Warm paper backgrounds, ink text,
+   hairline borders, square corners, generous whitespace.
+   Tokens live in @theme so every value is also a Tailwind utility
+   (e.g. bg-paper, text-ink-muted, border-line, font-serif, text-display).
+   ========================================================================== */
+
+@theme {
+  /* ---- Color ---------------------------------------------------------- */
+  --color-*: initial; /* drop Tailwind's default palette: use tokens only */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-paper: #fbfaf4; /* page background */
+  --color-paper-deep: #f2efe3; /* alternate sections, image wells */
+  --color-sand: #e6e0cd; /* image wells, tags, skeletons */
+  --color-stone: #c9c1aa; /* strong dividers, disabled fills */
+
+  --color-ink: #252421; /* primary text, primary button */
+  --color-ink-soft: #3d3b36; /* button hover, dark surfaces */
+  --color-ink-muted: #66625a; /* secondary text, meta */
+  --color-ink-subtle: #8f8a7e; /* placeholders, captions (large text only) */
+  --color-ink-inverse: #fbfaf4; /* text on ink surfaces */
+
+  --color-line: #d9d4c4; /* default 1px hairline */
+  --color-line-strong: #252421; /* input focus, active tab */
+
+  --color-moss: #4a5340; /* accent: badges, active states */
+  --color-clay: #9a5b3c; /* accent: sale / highlight, sparingly */
+  --color-error: #9b2c22;
+  --color-success: #3f5a3a;
+
+  /* ---- Typography ----------------------------------------------------- */
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Restrained scale: small UI text, large but light editorial display */
+  --text-micro: 0.6875rem; /* 11px – eyebrows, legal */
+  --text-micro--line-height: 1.45;
+  --text-micro--letter-spacing: 0.06em;
+  --text-xs: 0.75rem; /* 12px */
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem; /* 14px – UI, nav, buttons */
+  --text-sm--line-height: 1.55;
+  --text-base: 1rem; /* 16px – body */
+  --text-base--line-height: 1.65;
+  --text-lg: 1.125rem; /* 18px – lead */
+  --text-lg--line-height: 1.6;
+  --text-xl: 1.375rem; /* 22px – h4 */
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.75rem; /* 28px – h3 */
+  --text-2xl--line-height: 1.3;
+  --text-3xl: 2.25rem; /* 36px – h2 */
+  --text-3xl--line-height: 1.2;
+  --text-4xl: 3rem; /* 48px – h1 */
+  --text-4xl--line-height: 1.12;
+  --text-display: 4rem; /* 64px – hero */
+  --text-display--line-height: 1.05;
+
+  --tracking-tightish: -0.01em;
+  --tracking-label: 0.08em;
+
+  /* ---- Spacing / layout ---------------------------------------------- */
+  /* Tailwind's 4px spacing scale stays; these add named layout rhythm. */
+  --spacing-gutter: 1.25rem; /* page side padding (mobile) */
+  --spacing-gutter-md: 2.5rem; /* ≥ md */
+  --spacing-gutter-xl: 4rem; /* ≥ xl */
+  --spacing-section: 4rem; /* vertical section padding (mobile) */
+  --spacing-section-md: 6rem;
+  --spacing-section-xl: 8rem;
+  --spacing-header: 4rem; /* header height */
+
+  --container-prose: 40rem; /* ~65ch reading measure */
+  --container-narrow: 56rem;
+  --container-page: 90rem; /* 1440px max content width */
+
+  /* ---- Breakpoints (mobile-first) ------------------------------------- */
+  --breakpoint-sm: 40rem; /* 640 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+  --breakpoint-2xl: 96rem; /* 1536 */
+
+  /* ---- Borders, radius, shadow, motion -------------------------------- */
+  --radius-*: initial; /* square by default */
+  --radius-none: 0;
+  --radius-sm: 2px; /* inputs/tags only if needed */
+  --radius-full: 9999px; /* swatches, counters */
+
+  --shadow-*: initial; /* no decorative shadows */
+  --shadow-overlay: 0 8px 32px rgb(37 36 33 / 0.12); /* drawers, popovers */
+
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  --aspect-product: 4 / 5;
+  --aspect-editorial: 3 / 2;
+}
+
+/* Motion durations (plain vars; in markup use duration-150/300/600) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: var(--spacing-header);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Editorial headings: serif, light, slightly tight */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: var(--tracking-tightish);
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
+  }
+  h2 {
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl--line-height);
+  }
+  h3 {
+    font-size: var(--text-xl);
+    line-height: var(--text-xl--line-height);
+  }
+  /* Small headings stay sans: they act as UI labels */
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+  }
+  @media (width >= 48rem) {
+    h1 {
+      font-size: var(--text-4xl);
+      line-height: var(--text-4xl--line-height);
+    }
+    h2 {
+      font-size: var(--text-3xl);
+      line-height: var(--text-3xl--line-height);
+    }
+    h3 {
+      font-size: var(--text-2xl);
+      line-height: var(--text-2xl--line-height);
+    }
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--color-line);
+  }
+
+  ::selection {
+    background-color: var(--color-sand);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ==========================================================================
+   Layout utilities
+   ========================================================================== */
+
+/* Full-bleed page container with responsive gutters */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+  @media (width >= 48rem) {
+    padding-inline: var(--spacing-gutter-md);
+  }
+  @media (width >= 80rem) {
+    padding-inline: var(--spacing-gutter-xl);
+  }
+}
+
+@utility container-narrow {
+  width: 100%;
+  max-width: calc(var(--container-narrow) + 2 * var(--spacing-gutter));
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility container-prose {
+  width: 100%;
+  max-width: calc(var(--container-prose) + 2 * var(--spacing-gutter));
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Vertical rhythm between page sections */
+@utility section-y {
+  padding-block: var(--spacing-section);
+  @media (width >= 48rem) {
+    padding-block: var(--spacing-section-md);
+  }
+  @media (width >= 80rem) {
+    padding-block: var(--spacing-section-xl);
+  }
+}
+
+/* 12-col grid on desktop, 4 on mobile, 8 on tablet */
+@utility grid-page {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1rem;
+  row-gap: 2.5rem;
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    row-gap: 3.5rem;
+  }
+}
+
+/* ==========================================================================
+   Typography utilities
+   ========================================================================== */
+
+@utility text-hero {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: var(--text-4xl);
+  line-height: var(--text-4xl--line-height);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  @media (width >= 64rem) {
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+  }
+}
+
+@utility text-lead {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  color: var(--color-ink-muted);
+}
+
+/* Small uppercase label above headings */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+@utility text-meta {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  color: var(--color-ink-muted);
+}
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+/* Inline / standalone text link: thin underline that lifts on hover */
+@utility link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Navigation link: no underline at rest, underline grows in on hover/active */
+@utility link-nav {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.2em;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-base) var(--ease-standard);
+  }
+  &:hover::after,
+  &[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+}
+
+/* ==========================================================================
+   Buttons
+   Square, 1px border, sentence-case sans text, color-only transitions.
+   ========================================================================== */
+
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 3rem; /* 48px touch target */
+  padding-inline: 1.75rem;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard);
+  &:disabled,
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+@utility btn-primary {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-ink-inverse);
+  &:hover {
+    background-color: var(--color-ink-soft);
+    border-color: var(--color-ink-soft);
+  }
+}
+
+@utility btn-secondary {
+  background-color: transparent;
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+  &:hover {
+    background-color: var(--color-ink);
+    color: var(--color-ink-inverse);
+  }
+}
+
+/* For dark / image backgrounds */
+@utility btn-inverse {
+  background-color: var(--color-paper);
+  border-color: var(--color-paper);
+  color: var(--color-ink);
+  &:hover {
+    background-color: transparent;
+    color: var(--color-paper);
+  }
+}
+
+/* Text-only action with trailing arrow; arrow nudges on hover */
+@utility btn-text {
+  min-height: auto;
+  padding-inline: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  & > [data-arrow] {
+    transition: transform var(--duration-base) var(--ease-standard);
+  }
+  &:hover > [data-arrow] {
+    transform: translateX(0.25rem);
+  }
+}
+
+@utility btn-sm {
+  min-height: 2.5rem;
+  padding-inline: 1.25rem;
+  font-size: var(--text-xs);
+}
+
+@utility btn-block {
+  width: 100%;
+}
+
+/* ==========================================================================
+   Borders, surfaces, form fields
+   ========================================================================== */
+
+@utility hairline {
+  border: 1px solid var(--color-line);
+}
+@utility hairline-t {
+  border-top: 1px solid var(--color-line);
+}
+@utility hairline-b {
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* Image well: tinted background products sit on */
+@utility media-well {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-paper-deep);
+}
+
+/* Underlined input: bottom border only, ink on focus */
+@utility field {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-base); /* ≥16px avoids iOS zoom */
+  transition: border-color var(--duration-fast) var(--ease-standard);
+  &::placeholder {
+    color: var(--color-ink-subtle);
+  }
+  &:focus {
+    outline: none;
+    border-bottom-color: var(--color-line-strong);
+  }
+  &[aria-invalid="true"] {
+    border-bottom-color: var(--color-error);
+  }
 }

@@ -5,9 +5,9 @@ Next.js (App Router) + TypeScript + Tailwind CSS v4 + Better Auth + Drizzle ORM 
 ## Setup
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env.local   # fill in DATABASE_URL, BETTER_AUTH_SECRET, ...
-npm run dev
+pnpm dev
 ```
 
 ## Scripts
@@ -37,4 +37,4 @@ drizzle/                        # generated migrations
 drizzle.config.ts
 ```
 
-Better Auth tables are not created yet: run `npx @better-auth/cli generate` to emit the Drizzle schema, then `npm run db:generate && npm run db:migrate`.
+Better Auth tables are not created yet: run `pnpm dlx @better-auth/cli generate` to emit the Drizzle schema, then `pnpm db:generate && pnpm db:migrate`.
