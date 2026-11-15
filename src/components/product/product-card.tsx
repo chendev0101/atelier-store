@@ -12,6 +12,8 @@ export type ProductCardProps = {
   /** e.g. "100 mL" or "3 sizes" */
   size?: string;
   image?: { src: string; alt: string };
+  /** `contain` for cut-out packshots on the well; `cover` for photographs. */
+  imageFit?: "contain" | "cover";
   badge?: string;
   className?: string;
 };
@@ -27,6 +29,7 @@ export function ProductCard({
   price,
   size,
   image,
+  imageFit = "contain",
   badge,
   className,
 }: ProductCardProps) {
@@ -40,7 +43,10 @@ export function ProductCard({
               alt={image.alt}
               fill
               sizes="(min-width: 64rem) 25vw, (min-width: 48rem) 33vw, 50vw"
-              className="object-contain p-8 transition-transform duration-600 ease-standard group-hover:scale-[1.03]"
+              className={cn(
+                "transition-transform duration-600 ease-standard group-hover:scale-[1.03]",
+                imageFit === "cover" ? "object-cover" : "object-contain p-8",
+              )}
             />
           ) : (
             <div aria-hidden="true" className="absolute inset-0 bg-sand/40" />
