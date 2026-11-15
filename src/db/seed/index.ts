@@ -14,10 +14,11 @@ import * as schema from "../schema";
 import { categories, inventory, products } from "../schema";
 import { seedCategories, seedProducts } from "./catalog-data";
 
-config({ path: ".env.local", quiet: true });
+// Same lookup as Next.js: .env.local wins over .env.
+config({ path: [".env.local", ".env"], quiet: true });
 
 const url = process.env.DATABASE_URL;
-if (!url) throw new Error("DATABASE_URL is not set (expected in .env.local)");
+if (!url) throw new Error("DATABASE_URL is not set (expected in .env.local or .env)");
 
 const db = drizzle({ client: neon(url), schema });
 
