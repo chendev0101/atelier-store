@@ -1,6 +1,6 @@
 import { ProductCard } from "@/components/product/product-card";
 import { cn } from "@/lib/cn";
-import type { SampleProduct } from "@/lib/sample-catalog";
+import { type Product, toCardProps } from "@/lib/sample-catalog";
 
 /**
  * Products as a swipeable, snap-scrolling rail on small screens and a plain
@@ -11,7 +11,7 @@ export function ProductRail({
   columns = 4,
   label,
 }: {
-  products: SampleProduct[];
+  products: Product[];
   columns?: 3 | 4;
   label: string;
 }) {
@@ -25,8 +25,8 @@ export function ProductRail({
       )}
     >
       {products.map((p) => (
-        <li key={p.href} className="w-[72%] shrink-0 snap-start sm:w-[44%] md:w-auto">
-          <ProductCard {...p} imageFit="cover" />
+        <li key={p.slug} className="w-[72%] shrink-0 snap-start sm:w-[44%] md:w-auto">
+          <ProductCard {...toCardProps(p)} imageFit="cover" />
         </li>
       ))}
     </ul>

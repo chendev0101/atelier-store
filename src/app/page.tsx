@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ProductRail } from "@/components/home/product-rail";
-import { SectionHeading } from "@/components/home/section-heading";
+import { ProductRail } from "@/components/product/product-rail";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Section } from "@/components/ui/container";
 import {
