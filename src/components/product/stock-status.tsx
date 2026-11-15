@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn";
-import type { StockStatus as Stock } from "@/lib/sample-catalog";
+import type { StockStatus as Stock } from "@/lib/catalog";
 
 const display = {
   in_stock: { dot: "bg-moss", text: "text-ink" },

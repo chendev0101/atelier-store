@@ -1,6 +1,6 @@
 import { ProductCard } from "@/components/product/product-card";
 import { cn } from "@/lib/cn";
-import { type Product, toCardProps } from "@/lib/sample-catalog";
+import { type Product, toCardProps } from "@/lib/catalog";
 
 /**
  * Products as a swipeable, snap-scrolling rail on small screens and a plain

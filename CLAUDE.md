@@ -16,10 +16,13 @@ pnpm typecheck    # next typegen && tsc --noEmit — typegen is required, it gen
 pnpm db:generate  # drizzle-kit: write SQL migrations to drizzle/ from src/db/schema
 pnpm db:migrate   # apply migrations to Neon
 pnpm db:push      # push schema without migrations (prototyping only)
+pnpm db:seed      # upsert the starting catalogue (src/db/seed); re-runnable, resets stock
 pnpm db:studio
 ```
 
 No test framework is set up yet.
+
+`pnpm build` reads the catalogue (for `generateStaticParams` and cached pages), so the build environment needs `DATABASE_URL` pointing at a migrated, seeded database.
 
 ## Git
 
@@ -52,7 +55,10 @@ src/lib/env.ts  →  src/db/index.ts  →  src/lib/auth.ts  →  src/app/api/aut
 
 - `src/lib/env.ts` — zod-validates server env at import time and throws on invalid values. Add new server env vars to its schema and to `.env.example`. Read env through `env`, not `process.env`.
 - `src/db/index.ts` — Drizzle over `drizzle-orm/neon-http` (stateless HTTP; no interactive transactions). Exports `db` with the full schema attached.
-- `src/db/schema/` — table definitions; every table must be re-exported from `schema/index.ts` (both `db` and drizzle-kit read that entry). Currently empty.
+- `src/db/schema/` — table definitions; every table must be re-exported from `schema/index.ts` (both `db` and drizzle-kit read that entry). `catalog.ts` holds `categories`, `products` (price in cents) and 1:1 `inventory`. Schema files must not import `server-only`: drizzle-kit and the seed script load them outside Next.js.
+- `src/db/queries/catalog.ts` — the only place pages read the catalogue. Each function is `"use cache"` + `cacheLife("minutes")` + `cacheTag("catalog")` (required under `cacheComponents`); call `updateTag("catalog")` after catalogue or stock writes. Rows are mapped to the domain types in `src/lib/catalog.ts` (types + pure helpers like `formatPrice`, `toStockStatus`, safe to import anywhere).
+- `src/lib/storefront-content.ts` — editorial homepage content (imagery, copy, hand-picked product slugs); not in the DB.
+- `src/db/seed/` — `pnpm db:seed` builds its own Neon client (it can't import `@/db`, which is `server-only`).
 - `src/lib/auth.ts` — Better Auth with `drizzleAdapter(db, { provider: "pg" })`. `nextCookies()` must remain the last plugin. Server code gets sessions via `auth.api.getSession({ headers })`.
 - `src/lib/auth-client.ts` — browser client (`better-auth/react`), uses `NEXT_PUBLIC_APP_URL`.
 

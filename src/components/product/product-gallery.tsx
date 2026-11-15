@@ -1,13 +1,13 @@
 import Image from "next/image";
 import { cn } from "@/lib/cn";
-import type { SampleImage } from "@/lib/sample-catalog";
+import type { ImageAsset } from "@/lib/catalog";
 
 /**
  * Large product imagery. Mobile: a swipeable, snap-scrolling strip that bleeds
  * to the screen edge (the next image peeks in). lg+: images stacked in a
  * column so they stay large while the details panel stays in view.
  */
-export function ProductGallery({ images, name }: { images: SampleImage[]; name: string }) {
+export function ProductGallery({ images, name }: { images: ImageAsset[]; name: string }) {
   const many = images.length > 1;
   return (
     <ul

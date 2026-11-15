@@ -4,17 +4,23 @@ import { ProductRail } from "@/components/product/product-rail";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Section } from "@/components/ui/container";
+import { getCategories, getProductsBySlugs } from "@/db/queries/catalog";
 import {
   approachImage,
   featuredSeries,
   heroImage,
-  newArrivals,
-  ranges,
+  newArrivalSlugs,
   ritualImage,
   services,
-} from "@/lib/sample-catalog";
+} from "@/lib/storefront-content";
 
-export default function Home() {
+export default async function Home() {
+  const [ranges, newArrivals, seriesProducts] = await Promise.all([
+    getCategories(),
+    getProductsBySlugs(newArrivalSlugs),
+    getProductsBySlugs(featuredSeries.productSlugs),
+  ]);
+
   return (
     <>
       {/* Hero: tall image beside the headline; image leads on mobile */}
@@ -112,7 +118,7 @@ export default function Home() {
           </div>
           <div className="mt-16 md:mt-20">
             <ProductRail
-              products={featuredSeries.products}
+              products={seriesProducts}
               columns={3}
               label={`${featuredSeries.title} products`}
             />

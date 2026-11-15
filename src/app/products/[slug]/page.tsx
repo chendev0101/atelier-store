@@ -8,22 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Container, Section } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { TextLink } from "@/components/ui/text-link";
-import {
-  categories,
-  formatPrice,
-  getProduct,
-  getRelatedProducts,
-  products,
-} from "@/lib/sample-catalog";
+import { getProduct, getProductSlugs, getRelatedProducts } from "@/db/queries/catalog";
+import { formatPrice } from "@/lib/catalog";
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getProductSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[slug]">): Promise<Metadata> {
-  const product = getProduct((await params).slug);
+  const product = await getProduct((await params).slug);
   if (!product) return {};
   return {
     title: product.name,
@@ -33,10 +28,10 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params }: PageProps<"/products/[slug]">) {
-  const product = getProduct((await params).slug);
+  const product = await getProduct((await params).slug);
   if (!product) notFound();
 
-  const category = categories[product.category];
+  const { category } = product;
   const soldOut = product.stock.state === "out_of_stock";
   const gallery = [
     ...product.images,
@@ -44,7 +39,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
       ? []
       : [category.contextImage]),
   ];
-  const related = getRelatedProducts(product);
+  const related = await getRelatedProducts(product.slug);
 
   return (
     <>
@@ -86,7 +81,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           <div className="hairline-t mt-8 pt-6">
             <div className="flex items-baseline justify-between gap-4">
               <p className="font-serif text-2xl">
-                {formatPrice(product.price)}
+                {formatPrice(product.priceCents)}
                 <span className="sr-only">, </span>
                 <span className="text-meta ml-2 font-sans">{product.size}</span>
               </p>
