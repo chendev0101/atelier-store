@@ -21,6 +21,23 @@ pnpm db:studio
 
 No test framework is set up yet.
 
+## Git
+
+Branches: `<type>/<short-name>`, e.g. `feat/homepage`, `chore/project-setup`.
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <imperative, lowercase subject, ~50 chars, no period>
+
+<optional body: why the change was made and any caveats, wrapped at ~72.
+Not a file-by-file list of what changed — the diff shows that.>
+```
+
+- Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`, `perf`.
+- Scope is the area touched: `home`, `products`, `catalog`, `auth`, `db`, `ui`.
+- One concern per commit: split refactors from the feature that needs them, and make sure each commit passes `pnpm typecheck` and `pnpm lint` on its own.
+
 Env lives in `.env.local` (template: `.env.example`). `drizzle.config.ts` loads `.env.local` via dotenv; the app loads it via Next.js.
 
 ## Architecture
