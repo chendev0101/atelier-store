@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductRail } from "@/components/product/product-rail";
 import { StockStatus } from "@/components/product/stock-status";
@@ -20,14 +20,41 @@ export async function generateMetadata({
 }: PageProps<"/products/[slug]">): Promise<Metadata> {
   const product = await getProduct((await params).slug);
   if (!product) return {};
+  const image = product.images[0];
   return {
     title: product.name,
     description: product.description,
-    openGraph: { images: [product.images[0].src] },
+    openGraph: image ? { images: [image.src] } : undefined,
   };
 }
 
-export default async function ProductPage({ params }: PageProps<"/products/[slug]">) {
+type Params = PageProps<"/products/[slug]">["params"];
+
+/*
+ * Everything here depends on the URL, so it renders inside <Suspense>: the
+ * route's shared App Shell can't hold one product's data. Slugs from
+ * generateStaticParams are still fully prerendered.
+ */
+export default function ProductPage({ params }: PageProps<"/products/[slug]">) {
+  return (
+    <Suspense fallback={<ProductPageFallback />}>
+      <ProductDetails params={params} />
+    </Suspense>
+  );
+}
+
+function ProductPageFallback() {
+  return (
+    <Container className="grid gap-10 pt-14 pb-16 md:pt-16 md:pb-24 lg:grid-cols-12 lg:gap-8">
+      <div className="media-well aspect-product lg:col-span-7" />
+      <div aria-busy="true" className="lg:col-span-5 lg:col-start-8 xl:col-span-4 xl:col-start-9">
+        <span className="sr-only">Loading product</span>
+      </div>
+    </Container>
+  );
+}
+
+async function ProductDetails({ params }: { params: Params }) {
   const product = await getProduct((await params).slug);
   if (!product) notFound();
 
