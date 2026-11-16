@@ -14,6 +14,12 @@ const serverEnvSchema = z.object({
   // copied from .env.example) count as unset.
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
+  // Secret (sk_) or restricted (rk_) key; test-mode keys in development.
+  STRIPE_SECRET_KEY: z
+    .string()
+    .regex(/^(sk|rk)_(test|live)_/, "STRIPE_SECRET_KEY must start with sk_ or rk_ (test or live)"),
+  // Needed once the webhook route exists; empty until `stripe listen` prints one.
+  STRIPE_WEBHOOK_SECRET: optionalString,
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

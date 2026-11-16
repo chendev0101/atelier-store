@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { CheckoutButton } from "@/components/cart/checkout-button";
 import { QuantityControl } from "@/components/cart/quantity-control";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { getCart } from "@/db/queries/cart";
 import { FREE_SHIPPING_THRESHOLD_CENTS } from "@/lib/cart";
@@ -136,12 +137,11 @@ async function CartContents() {
               : "Your order ships free."}
           </p>
 
-          {/* Wired to Stripe Checkout in the next step. */}
-          <Button block className="mt-6" disabled>
-            Checkout
-          </Button>
+          <CheckoutButton disabled={overStock} />
           <p className="text-meta mt-3 text-center text-xs">
-            {overStock ? "Adjust the items marked above to continue." : "Checkout is coming soon."}
+            {overStock
+              ? "Adjust the items marked above to continue."
+              : "Secure payment by Stripe. Shipping is chosen at checkout."}
           </p>
         </aside>
       </div>

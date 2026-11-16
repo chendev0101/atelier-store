@@ -28,12 +28,23 @@ export type CartLine = {
 };
 
 export type Cart = {
+  /** Null until the visitor adds something. */
+  id: string | null;
   lines: CartLine[];
   /** Total units across lines. */
   count: number;
   subtotalCents: number;
 };
 
-export const emptyCart: Cart = { lines: [], count: 0, subtotalCents: 0 };
+export const emptyCart: Cart = { id: null, lines: [], count: 0, subtotalCents: 0 };
+
+/** Countries Stripe Checkout will ship to. ISO 3166-1 alpha-2. */
+export const SHIPPING_COUNTRIES = ["US", "TW"] as const;
+
+/** Offered at checkout; standard is free at FREE_SHIPPING_THRESHOLD_CENTS. */
+export const SHIPPING_METHODS = {
+  standard: { name: "Standard", amountCents: 800, businessDays: [5, 8] },
+  express: { name: "Express", amountCents: 2000, businessDays: [1, 3] },
+} as const;
 
 export type CartActionResult = { ok: true; count: number } | { ok: false; error: string };

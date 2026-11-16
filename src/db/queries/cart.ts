@@ -109,6 +109,7 @@ export async function getCart(): Promise<Cart> {
   }));
 
   return {
+    id: cartId,
     lines,
     count: lines.reduce((n, l) => n + l.quantity, 0),
     subtotalCents: lines.reduce((n, l) => n + l.lineTotalCents, 0),
