@@ -62,10 +62,24 @@ export const seedCategories: SeedCategory[] = [
     },
   },
   {
+    slug: "hair",
+    name: "Hair",
+    note: "Washes, masks and scalp care",
+    position: 2,
+    image: {
+      src: unsplash("1619451334792-150fd785ee74"),
+      alt: "Two hands holding an open jar of pale green gel against a white linen shirt",
+    },
+    contextImage: {
+      src: unsplash("1620626011761-996317b8d101"),
+      alt: "A calm white bathroom with a freestanding tub, a bamboo bath tray and a fern by the window",
+    },
+  },
+  {
     slug: "fragrance",
     name: "Fragrance",
     note: "Eaux de parfum",
-    position: 2,
+    position: 3,
     image: {
       src: unsplash("1622618991746-fe6004db3a47"),
       alt: "Three amber fragrance bottles catching warm light",
@@ -79,7 +93,7 @@ export const seedCategories: SeedCategory[] = [
     slug: "home",
     name: "Home",
     note: "Candles and room mists",
-    position: 3,
+    position: 4,
     image: {
       src: unsplash("1603006905003-be475563bc59"),
       alt: "A lit candle in a smoked glass vessel on a soft wool throw",
@@ -87,6 +101,20 @@ export const seedCategories: SeedCategory[] = [
     contextImage: {
       src: unsplash("1612196808214-b8e1d6145a8c"),
       alt: "A matte ceramic vase on a low shelf beneath a hanging green branch",
+    },
+  },
+  {
+    slug: "gifts",
+    name: "Gifts",
+    note: "Sets and small presents",
+    position: 5,
+    image: {
+      src: unsplash("1600857544200-b2f666a9a2ec"),
+      alt: "Four paper-wrapped soap bars tied with twine on a wooden table among lavender sprigs",
+    },
+    contextImage: {
+      src: unsplash("1608571423902-eed4a5ad8108"),
+      alt: "An amber glass dropper bottle on a turned wooden stand, palm shadows falling across a pale wall",
     },
   },
 ];
@@ -265,6 +293,107 @@ export const seedProducts: SeedProduct[] = [
       },
     ],
     keyIngredients: ["Rapeseed wax", "Cedarwood", "Cotton wick"],
+    howToUse:
+      "Burn for at least two hours the first time so the surface melts evenly. Trim the wick to 5 mm before each use.",
+  },
+  {
+    slug: "rosemary-scalp-oil",
+    name: "Rosemary Scalp Oil",
+    categorySlug: "hair",
+    tagline: "A weekly scalp treatment",
+    description:
+      "A light pre-wash oil that loosens build-up and leaves the scalp calm. Rinses out cleanly without weighing hair down.",
+    priceCents: 4200,
+    size: "50 mL",
+    quantity: 18,
+    images: [
+      {
+        src: unsplash("1608571423902-eed4a5ad8108"),
+        alt: "An amber glass dropper bottle on a turned wooden stand, palm shadows falling across a pale wall",
+      },
+    ],
+    keyIngredients: ["Rosemary leaf oil", "Jojoba", "Peppermint"],
+    howToUse:
+      "Part dry hair and apply a few drops along the scalp. Massage in, leave for twenty minutes or overnight, then wash as usual.",
+  },
+  {
+    slug: "aloe-hair-mask",
+    name: "Aloe Hair Mask",
+    categorySlug: "hair",
+    tagline: "Softens without residue",
+    description:
+      "A cooling gel mask that smooths lengths and ends. Water-light, so it suits fine hair as well as thick.",
+    priceCents: 3800,
+    size: "200 mL",
+    quantity: 24,
+    badge: "New",
+    images: [
+      {
+        src: unsplash("1619451334792-150fd785ee74"),
+        alt: "Two hands holding an open jar of pale green gel against a white linen shirt",
+      },
+    ],
+    keyIngredients: ["Aloe vera", "Oat protein", "Sunflower oil"],
+    howToUse:
+      "After washing, squeeze out excess water and work a generous amount through the lengths. Leave for five minutes and rinse.",
+  },
+  {
+    slug: "bath-ritual-set",
+    name: "Bath Ritual Set",
+    categorySlug: "gifts",
+    tagline: "Bar, brush and towel",
+    description:
+      "Our cedar body bar with a beechwood bath brush and an organic cotton towel, wrapped in recycled paper.",
+    priceCents: 7200,
+    size: "3 pieces",
+    quantity: 12,
+    images: [
+      {
+        src: unsplash("1590439471364-192aa70c0b53"),
+        alt: "A folded cotton towel, a round body bar and a wooden bath brush on linen",
+      },
+    ],
+    keyIngredients: ["Cedar body bar", "Beechwood brush", "Organic cotton towel"],
+    howToUse:
+      "Brush dry skin in long strokes towards the heart before bathing, then wash with the bar and wrap up in the towel.",
+  },
+  {
+    slug: "fragrance-discovery-set",
+    name: "Fragrance Discovery Set",
+    categorySlug: "gifts",
+    tagline: "Three scents to try",
+    description:
+      "Vetiver, neroli and fig in travel sizes, so you can wear each for a few days before choosing a full bottle.",
+    priceCents: 4800,
+    size: "3 × 10 mL",
+    quantity: 5,
+    badge: "Limited",
+    images: [
+      {
+        src: unsplash("1622618991746-fe6004db3a47"),
+        alt: "Three amber fragrance bottles catching warm light",
+      },
+    ],
+    keyIngredients: ["Vetiver", "Neroli", "Fig leaf"],
+    howToUse: "Apply to pulse points: wrists, neck and behind the ears. Do not rub.",
+  },
+  {
+    slug: "evening-candle-gift",
+    name: "Evening Candle Gift",
+    categorySlug: "gifts",
+    tagline: "Candle with a wool throw",
+    description:
+      "A hand-poured amber and tonka candle with a small undyed wool throw, for slow evenings at home.",
+    priceCents: 9600,
+    size: "2 pieces",
+    quantity: 8,
+    images: [
+      {
+        src: unsplash("1603006905003-be475563bc59"),
+        alt: "A lit candle in a smoked glass vessel on a soft wool throw",
+      },
+    ],
+    keyIngredients: ["Rapeseed wax", "Amber and tonka", "Undyed wool"],
     howToUse:
       "Burn for at least two hours the first time so the surface melts evenly. Trim the wick to 5 mm before each use.",
   },
