@@ -4,12 +4,11 @@ import { ProductRail } from "@/components/product/product-rail";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Section } from "@/components/ui/container";
-import { getCategories, getProductsBySlugs } from "@/db/queries/catalog";
+import { getCategories, getNewProducts, getProductsBySlugs } from "@/db/queries/catalog";
 import {
   approachImage,
   featuredSeries,
   heroImage,
-  newArrivalSlugs,
   ritualImage,
   services,
 } from "@/lib/storefront-content";
@@ -17,7 +16,7 @@ import {
 export default async function Home() {
   const [ranges, newArrivals, seriesProducts] = await Promise.all([
     getCategories(),
-    getProductsBySlugs(newArrivalSlugs),
+    getNewProducts(4),
     getProductsBySlugs(featuredSeries.productSlugs),
   ]);
 
@@ -53,18 +52,20 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* New arrivals */}
-      <Section aria-labelledby="new-title">
-        <Container>
-          <SectionHeading
-            id="new-title"
-            eyebrow="Just arrived"
-            title="New formulations"
-            action={{ label: "View all", href: "/shop/new" }}
-          />
-          <ProductRail products={newArrivals} label="New formulations" />
-        </Container>
-      </Section>
+      {/* New arrivals: hidden when nothing is flagged new */}
+      {newArrivals.length > 0 && (
+        <Section aria-labelledby="new-title">
+          <Container>
+            <SectionHeading
+              id="new-title"
+              eyebrow="Just arrived"
+              title="New formulations"
+              action={{ label: "View all", href: "/shop/new" }}
+            />
+            <ProductRail products={newArrivals} label="New formulations" />
+          </Container>
+        </Section>
+      )}
 
       {/* Shop by range */}
       <Section aria-labelledby="ranges-title" className="hairline-t">

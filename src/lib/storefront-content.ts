@@ -14,13 +14,6 @@ export const heroImage: ImageAsset = {
   alt: "An amber glass dropper bottle on a turned wooden stand, palm shadows falling across a pale wall",
 };
 
-export const newArrivalSlugs = [
-  "rosehip-facial-oil",
-  "oat-cleansing-balm",
-  "geranium-hand-wash",
-  "neroli-body-lotion",
-];
-
 export const featuredSeries = {
   eyebrow: "The series",
   title: "Cedar & Vetiver",
