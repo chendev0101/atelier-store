@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { TextLink } from "@/components/ui/text-link";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
@@ -22,7 +22,14 @@ const defaultNav: NavItem[] = [
  * ≥ lg: wordmark left, category links inline, utility links right.
  * < lg: menu toggle, centered wordmark, cart; full-height drawer.
  */
-export function SiteHeader({ nav = defaultNav }: { nav?: NavItem[] }) {
+export function SiteHeader({
+  nav = defaultNav,
+  cartLink,
+}: {
+  nav?: NavItem[];
+  /** Server-rendered cart link (with count), passed in from the layout. */
+  cartLink: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   // While the session loads, show "Account": /account sends guests to sign-in anyway.
   const { data: session, isPending } = authClient.useSession();
@@ -82,9 +89,7 @@ export function SiteHeader({ nav = defaultNav }: { nav?: NavItem[] }) {
           <TextLink variant="nav" href={accountLink.href} className="hidden lg:inline">
             {accountLink.label}
           </TextLink>
-          <TextLink variant="nav" href="/cart">
-            Cart
-          </TextLink>
+          {cartLink}
         </div>
       </div>
 

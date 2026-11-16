@@ -1,8 +1,11 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
+import { mergeGuestCart } from "@/db/queries/cart-merge";
+import { CART_COOKIE } from "@/lib/cart";
 import { env } from "@/lib/env";
 
 const google =
@@ -32,6 +35,22 @@ export const auth = betterAuth({
       enabled: true,
       trustedProviders: ["google"],
     },
+  },
+  hooks: {
+    // Any request that starts a session (email sign-in/up, OAuth callback)
+    // folds the guest cart into the user's cart and drops the guest cookie.
+    after: createAuthMiddleware(async (ctx) => {
+      const newSession = ctx.context.newSession;
+      const guestCartId = ctx.getCookie(CART_COOKIE);
+      if (!newSession || !guestCartId) return;
+      try {
+        await mergeGuestCart(guestCartId, newSession.user.id);
+        ctx.setCookie(CART_COOKIE, "", { path: "/", maxAge: 0 });
+      } catch (e) {
+        // Never fail a sign-in over the cart; the guest cart stays put.
+        ctx.context.logger.error("Failed to merge guest cart", e);
+      }
+    }),
   },
   // nextCookies must stay last in the plugins array.
   plugins: [nextCookies()],

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Newsreader } from "next/font/google";
+import { Suspense } from "react";
+import { CartLink, CartLinkView } from "@/components/cart/cart-link";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
@@ -32,7 +34,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} h-full`}>
       <body className="flex min-h-full flex-col">
-        <SiteHeader />
+        <SiteHeader
+          cartLink={
+            <Suspense fallback={<CartLinkView count={0} />}>
+              <CartLink />
+            </Suspense>
+          }
+        />
         <main className="flex-1">{children}</main>
         <SiteFooter />
       </body>

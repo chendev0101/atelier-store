@@ -4,7 +4,7 @@ import { type ReactNode, Suspense } from "react";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductRail } from "@/components/product/product-rail";
 import { StockStatus } from "@/components/product/stock-status";
-import { Button } from "@/components/ui/button";
+import { AddToBagButton } from "@/components/cart/add-to-bag-button";
 import { Container, Section } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { TextLink } from "@/components/ui/text-link";
@@ -115,10 +115,7 @@ async function ProductDetails({ params }: { params: Params }) {
               <StockStatus stock={product.stock} />
             </div>
 
-            {/* Not wired to a cart yet. */}
-            <Button block className="mt-6" disabled={soldOut}>
-              {soldOut ? "Sold out" : "Add to bag"}
-            </Button>
+            <AddToBagButton slug={product.slug} soldOut={soldOut} />
             {soldOut && (
               <p className="text-meta mt-3">
                 We make in small batches; this will be back in stock soon.
