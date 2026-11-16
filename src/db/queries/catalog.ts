@@ -67,6 +67,21 @@ export async function getCategories(): Promise<Category[]> {
   return rows.map(toCategory);
 }
 
+/** A category and its products, alphabetical. Undefined if the slug is unknown. */
+export async function getCategoryWithProducts(
+  slug: string,
+): Promise<{ category: Category; products: Product[] } | undefined> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("catalog");
+  const row = await db.query.categories.findFirst({
+    where: eq(categories.slug, slug),
+    with: { products: { with: withCategoryAndStock, orderBy: [asc(products.name)] } },
+  });
+  if (!row) return undefined;
+  return { category: toCategory(row), products: row.products.map(toProduct) };
+}
+
 export async function getProduct(slug: string): Promise<Product | undefined> {
   "use cache";
   cacheLife("minutes");
