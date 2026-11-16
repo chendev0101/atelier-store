@@ -37,6 +37,8 @@ export type Product = {
   size: string;
   stock: StockStatus;
   badge?: string;
+  /** Listed under New formulations. */
+  isNew: boolean;
   images: ImageAsset[];
   keyIngredients: string[];
   howToUse: string;
@@ -72,7 +74,7 @@ export function toCardProps(p: Product): ProductCardData {
     description: p.tagline,
     price: formatPrice(p.priceCents),
     size: p.size,
-    badge: p.stock.state === "out_of_stock" ? "Sold out" : p.badge,
+    badge: p.stock.state === "out_of_stock" ? "Sold out" : (p.badge ?? (p.isNew ? "New" : undefined)),
     image: p.images[0],
   };
 }

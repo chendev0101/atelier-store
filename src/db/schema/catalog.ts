@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   integer,
@@ -58,6 +59,8 @@ export const products = pgTable(
     priceCents: integer("price_cents").notNull(),
     size: text("size").notNull(),
     badge: text("badge"),
+    /** Listed under New formulations and badged "New" on cards. */
+    isNew: boolean("is_new").notNull().default(false),
     /** Ordered; the first is the card image. */
     images: jsonb("images").$type<ImageAsset[]>().notNull().default([]),
     keyIngredients: text("key_ingredients").array().notNull().default(sql`'{}'::text[]`),

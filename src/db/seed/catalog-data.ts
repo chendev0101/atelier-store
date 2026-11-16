@@ -26,6 +26,7 @@ export type SeedProduct = {
   priceCents: number;
   size: string;
   badge?: string;
+  isNew?: boolean;
   images: ImageAsset[];
   keyIngredients: string[];
   howToUse: string;
@@ -130,7 +131,7 @@ export const seedProducts: SeedProduct[] = [
     priceCents: 6400,
     size: "30 mL",
     quantity: 24,
-    badge: "New",
+    isNew: true,
     images: [
       {
         src: unsplash("1576426863848-c21f53c60b19"),
@@ -151,6 +152,7 @@ export const seedProducts: SeedProduct[] = [
     priceCents: 4600,
     size: "90 mL",
     quantity: 24,
+    isNew: true,
     images: [
       {
         src: unsplash("1599305090598-fe179d501227"),
@@ -190,6 +192,7 @@ export const seedProducts: SeedProduct[] = [
     priceCents: 3800,
     size: "500 mL",
     quantity: 24,
+    isNew: true,
     images: [
       {
         src: unsplash("1540555700478-4be289fbecef"),
@@ -209,6 +212,7 @@ export const seedProducts: SeedProduct[] = [
     priceCents: 5200,
     size: "250 mL",
     quantity: 24,
+    isNew: true,
     images: [
       {
         src: unsplash("1631729371254-42c2892f0e6e"),
@@ -306,6 +310,7 @@ export const seedProducts: SeedProduct[] = [
     priceCents: 4200,
     size: "50 mL",
     quantity: 18,
+    isNew: true,
     images: [
       {
         src: unsplash("1608571423902-eed4a5ad8108"),
@@ -326,7 +331,7 @@ export const seedProducts: SeedProduct[] = [
     priceCents: 3800,
     size: "200 mL",
     quantity: 24,
-    badge: "New",
+    isNew: true,
     images: [
       {
         src: unsplash("1619451334792-150fd785ee74"),

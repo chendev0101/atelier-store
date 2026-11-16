@@ -50,6 +50,7 @@ function toProduct(row: ProductRow): Product {
     // A product without an inventory row has nothing to sell.
     stock: toStockStatus(row.inventory?.quantity ?? 0),
     badge: row.badge ?? undefined,
+    isNew: row.isNew,
     images: row.images,
     keyIngredients: row.keyIngredients,
     howToUse: row.howToUse,
@@ -80,6 +81,20 @@ export async function getCategoryWithProducts(
   });
   if (!row) return undefined;
   return { category: toCategory(row), products: row.products.map(toProduct) };
+}
+
+/** Products flagged new, most recently added first. */
+export async function getNewProducts(limit?: number): Promise<Product[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("catalog");
+  const rows = await db.query.products.findMany({
+    where: eq(products.isNew, true),
+    with: withCategoryAndStock,
+    orderBy: [desc(products.createdAt), asc(products.name)],
+    limit,
+  });
+  return rows.map(toProduct);
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
