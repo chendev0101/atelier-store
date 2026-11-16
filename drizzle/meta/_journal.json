@@ -15,6 +15,13 @@
       "when": 1794809515632,
       "tag": "0001_product_is_new",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794815129965,
+      "tag": "0002_auth_tables",
+      "breakpoints": true
     }
   ]
 }
