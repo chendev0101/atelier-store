@@ -24,6 +24,15 @@ export const auth = betterAuth({
     minPasswordLength: 8,
   },
   socialProviders: google ? { google } : {},
+  account: {
+    accountLinking: {
+      // Google verifies the email it returns, so signing in with Google links
+      // to an existing email/password account with the same address instead
+      // of failing with account_not_linked.
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
   // nextCookies must stay last in the plugins array.
   plugins: [nextCookies()],
 });
