@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: rename-category-note
+expected_outcome: |
+  Renames categories.note to description in schema and code, produces a RENAME COLUMN migration (via --custom plus a repaired snapshot, verified by a second db:generate reporting no changes) without dropping data, shows the SQL and stops for approval before migrating.

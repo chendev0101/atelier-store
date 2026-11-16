@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: add-launched-at-column
+expected_outcome: |
+  Adds a launched_at timestamp column to products with a safe default, generates a named migration, updates seed (including the upsert list), domain type, mapper and getNewProducts ordering, passes typecheck/lint, shows the SQL and stops for approval before migrating.

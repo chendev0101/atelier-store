@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: add-reviews-table
+expected_outcome: |
+  Adds a reviews table in src/db/schema re-exported from index.ts, with a product foreign key, a 1-5 rating check, relations, a named migration, passes typecheck/lint, shows the SQL and stops for approval before migrating; builds no pages.
