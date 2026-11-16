@@ -6,6 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `AGENTS.md` is rewritten by `next dev`; put project rules here, not inside its BEGIN/END block. Next.js here is 16.x — check `node_modules/next/dist/docs/` before using framework APIs.
 
+## Language
+
+- 一律用繁體中文（台灣用語）回應。
+- 程式碼、指令、檔名、commit message 和程式碼註解維持英文。
+
 ## Commands
 
 ```bash
