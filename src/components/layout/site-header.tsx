@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TextLink } from "@/components/ui/text-link";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
 
 export type NavItem = { label: string; href: string };
@@ -23,6 +24,12 @@ const defaultNav: NavItem[] = [
  */
 export function SiteHeader({ nav = defaultNav }: { nav?: NavItem[] }) {
   const [open, setOpen] = useState(false);
+  // While the session loads, show "Account": /account sends guests to sign-in anyway.
+  const { data: session, isPending } = authClient.useSession();
+  const accountLink: NavItem =
+    isPending || session
+      ? { label: "Account", href: "/account" }
+      : { label: "Sign in", href: "/sign-in" };
 
   useEffect(() => {
     if (!open) return;
@@ -72,8 +79,8 @@ export function SiteHeader({ nav = defaultNav }: { nav?: NavItem[] }) {
           <TextLink variant="nav" href="/search" className="hidden lg:inline">
             Search
           </TextLink>
-          <TextLink variant="nav" href="/account" className="hidden lg:inline">
-            Account
+          <TextLink variant="nav" href={accountLink.href} className="hidden lg:inline">
+            {accountLink.label}
           </TextLink>
           <TextLink variant="nav" href="/cart">
             Cart
@@ -89,7 +96,7 @@ export function SiteHeader({ nav = defaultNav }: { nav?: NavItem[] }) {
       >
         <nav aria-label="Mobile" className="container-page py-8">
           <ul className="flex flex-col">
-            {[...nav, { label: "Search", href: "/search" }, { label: "Account", href: "/account" }].map(
+            {[...nav, { label: "Search", href: "/search" }, accountLink].map(
               (item, i) => (
                 <li key={item.href} className={cn("hairline-b", i === nav.length && "mt-8")}>
                   <Link
