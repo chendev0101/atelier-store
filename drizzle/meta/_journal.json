@@ -29,6 +29,13 @@
       "when": 1794817712766,
       "tag": "0003_add_carts",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794823752563,
+      "tag": "0004_add_orders",
+      "breakpoints": true
     }
   ]
 }
