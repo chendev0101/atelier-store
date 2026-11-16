@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
+import { connection } from "next/server";
 import { db } from "@/db";
 import { cartItems, carts, products } from "@/db/schema";
 import { auth } from "@/lib/auth";
@@ -24,6 +25,10 @@ import { env } from "@/lib/env";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function currentOwner() {
+  // Session checks read the clock (expiry), and a cart is per request, so
+  // keep this out of every prerender, including runtime prefetches where
+  // headers() and cookies() already resolve.
+  await connection();
   const [session, cookieStore] = await Promise.all([
     auth.api.getSession({ headers: await headers() }),
     cookies(),
