@@ -10,7 +10,11 @@ import { boolean, check, index, pgTable, text, timestamp } from "drizzle-orm/pg-
  * No `server-only` here: drizzle-kit loads this file outside Next.js.
  */
 
-export const USER_ROLES = ["customer", "admin"] as const;
+/**
+ * customer: shops. admin: full back office. demo: can open the back office
+ * read-only (for a public demo login); every write is refused server-side.
+ */
+export const USER_ROLES = ["customer", "admin", "demo"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const user = pgTable(
@@ -33,7 +37,7 @@ export const user = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (t) => [check("user_role_valid", sql`${t.role} in ('customer', 'admin')`)],
+  (t) => [check("user_role_valid", sql`${t.role} in ('customer', 'admin', 'demo')`)],
 );
 
 export const session = pgTable(
