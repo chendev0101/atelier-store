@@ -97,16 +97,22 @@ export async function getCart(): Promise<Cart> {
     orderBy: [asc(cartItems.createdAt)],
   });
 
-  const lines: CartLine[] = rows.map(({ product, quantity }) => ({
-    slug: product.slug,
+  const lines: CartLine[] = rows.map(({ product, quantity }) => {
+    const discontinued = product.status !== "active";
+    return {
+      productId: product.id,
+      slug: product.slug,
     name: product.name,
     size: product.size,
-    image: product.images[0],
-    unitPriceCents: product.priceCents,
-    quantity,
-    available: product.inventory?.quantity ?? 0,
-    lineTotalCents: product.priceCents * quantity,
-  }));
+      image: product.images[0],
+      unitPriceCents: product.priceCents,
+      quantity,
+      // A discontinued product can't be bought, whatever its stock.
+      available: discontinued ? 0 : (product.inventory?.quantity ?? 0),
+      discontinued,
+      lineTotalCents: product.priceCents * quantity,
+    };
+  });
 
   return {
     id: cartId,
@@ -134,7 +140,7 @@ export async function changeCartItem(
   mode: "add" | "set",
 ): Promise<number> {
   const product = await db.query.products.findFirst({
-    columns: { id: true, name: true },
+    columns: { id: true, name: true, status: true },
     where: eq(products.slug, slug),
     with: { inventory: { columns: { quantity: true } } },
   });
@@ -151,6 +157,8 @@ export async function changeCartItem(
     return getCartCount();
   }
 
+  // Removing (above) always works; adding needs the product to be on sale.
+  if (product.status !== "active") throw new CartError("That product is no longer available.");
   if (stock <= 0) throw new CartError(`${product.name} is sold out.`);
 
   const cartId = await ensureCartId();

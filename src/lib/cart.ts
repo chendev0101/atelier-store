@@ -16,14 +16,17 @@ export const FREE_SHIPPING_THRESHOLD_CENTS = 7500;
 export const MAX_LINE_QUANTITY = 10;
 
 export type CartLine = {
+  productId: string;
   slug: string;
   name: string;
   size: string;
   image?: ImageAsset;
   unitPriceCents: number;
   quantity: number;
-  /** Units in stock right now; a line may exceed it if stock dropped after adding. */
+  /** Units on sale right now; a line may exceed it if stock dropped after adding. */
   available: number;
+  /** The product was archived or unpublished after it was added. */
+  discontinued: boolean;
   lineTotalCents: number;
 };
 

@@ -49,8 +49,10 @@ export async function startCheckout(): Promise<CheckoutState> {
   if (short) {
     return {
       error:
-        short.available === 0
-          ? `${short.name} has sold out. Remove it to continue.`
+        short.discontinued
+          ? `${short.name} is no longer available. Remove it to continue.`
+          : short.available === 0
+            ? `${short.name} has sold out. Remove it to continue.`
           : `Only ${short.available} of ${short.name} left. Lower the quantity to continue.`,
     };
   }
@@ -69,7 +71,8 @@ export async function startCheckout(): Promise<CheckoutState> {
             name: line.name,
             description: line.size,
             images: line.image ? [line.image.src] : undefined,
-            metadata: { slug: line.slug },
+            // The webhook maps items back by id; the slug may change later.
+            metadata: { productId: line.productId, slug: line.slug },
           },
         },
       })),

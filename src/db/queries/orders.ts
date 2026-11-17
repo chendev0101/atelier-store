@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lte, or, sql } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db } from "@/db";
 import {
@@ -24,6 +24,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CLOCK_SLACK_MS = 60_000;
 
 export type CheckoutLine = {
+  /** Empty for sessions created before product ids were sent to Stripe. */
+  productId: string;
   slug: string;
   name: string;
   size: string;
@@ -43,6 +45,7 @@ export async function getCheckoutLines(sessionId: string): Promise<CheckoutLine[
     const details = product && typeof product === "object" && !product.deleted ? product : null;
     const quantity = item.quantity ?? 1;
     return {
+      productId: details?.metadata.productId ?? "",
       slug: details?.metadata.slug ?? "",
       name: details?.name ?? item.description ?? "Item",
       size: details?.description ?? "",
@@ -79,14 +82,23 @@ async function ensureOrder(session: Stripe.Checkout.Session, status: OrderStatus
   if (existing) return existing;
 
   const lines = await getCheckoutLines(session.id);
+  // Match by id first: the admin may rename a slug while a checkout is open.
+  const ids = lines.map((l) => l.productId).filter((id) => UUID.test(id));
   const slugs = lines.map((l) => l.slug).filter(Boolean);
-  const productRows = slugs.length
-    ? await db.query.products.findMany({
-        columns: { id: true, slug: true },
-        where: inArray(products.slug, slugs),
-      })
-    : [];
-  const productIds = new Map(productRows.map((p) => [p.slug, p.id]));
+  const productRows =
+    ids.length || slugs.length
+      ? await db.query.products.findMany({
+          columns: { id: true, slug: true },
+          where: or(
+            ids.length ? inArray(products.id, ids) : undefined,
+            slugs.length ? inArray(products.slug, slugs) : undefined,
+          ),
+        })
+      : [];
+  const knownIds = new Set(productRows.map((p) => p.id));
+  const idBySlug = new Map(productRows.map((p) => [p.slug, p.id]));
+  const productIdFor = (l: CheckoutLine) =>
+    knownIds.has(l.productId) ? l.productId : (idBySlug.get(l.slug) ?? null);
 
   const shippingRate = session.shipping_cost?.shipping_rate;
   const shippingMethod =
@@ -123,7 +135,7 @@ async function ensureOrder(session: Stripe.Checkout.Session, status: OrderStatus
       db.insert(orderItems).values(
         lines.map((l) => ({
           orderId: id,
-          productId: productIds.get(l.slug) ?? null,
+          productId: productIdFor(l),
           productSlug: l.slug,
           productName: l.name,
           productSize: l.size,

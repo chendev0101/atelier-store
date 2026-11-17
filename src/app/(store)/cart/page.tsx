@@ -92,8 +92,10 @@ async function CartContents() {
                   </p>
                   {line.quantity > line.available ? (
                     <p className="mt-2 text-xs text-error">
-                      {line.available === 0
-                        ? "Sold out since you added it."
+                      {line.discontinued
+                        ? "No longer available. Please remove it."
+                        : line.available === 0
+                          ? "Sold out since you added it."
                         : `Only ${line.available} left; please lower the quantity.`}
                     </p>
                   ) : line.available <= 5 ? (
