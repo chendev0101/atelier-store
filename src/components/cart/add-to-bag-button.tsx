@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { addToCart } from "@/app/cart/actions";
+import { addToCart } from "@/app/(store)/cart/actions";
 import { Button } from "@/components/ui/button";
 import { TextLink } from "@/components/ui/text-link";
 

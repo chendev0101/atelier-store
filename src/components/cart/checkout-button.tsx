@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { type CheckoutState, startCheckout } from "@/app/checkout/actions";
+import { type CheckoutState, startCheckout } from "@/app/(store)/checkout/actions";
 import { Button } from "@/components/ui/button";
 
 /** Sends the bag to Stripe Checkout; shows why if it can't. */

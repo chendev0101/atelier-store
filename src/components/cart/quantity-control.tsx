@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateCartItem } from "@/app/cart/actions";
+import { updateCartItem } from "@/app/(store)/cart/actions";
 import { cn } from "@/lib/cn";
 import { MAX_LINE_QUANTITY } from "@/lib/cart";
 

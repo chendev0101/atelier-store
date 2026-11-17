@@ -1,9 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Newsreader } from "next/font/google";
-import { Suspense } from "react";
-import { CartLink, CartLinkView } from "@/components/cart/cart-link";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
 import "./globals.css";
 
 // UI / body: neutral grotesk. Headings: light editorial serif.
@@ -30,20 +26,11 @@ export const viewport: Viewport = {
   themeColor: "#fbfaf4",
 };
 
+/* Document shell only; the storefront and admin each bring their own chrome. */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} h-full`}>
-      <body className="flex min-h-full flex-col">
-        <SiteHeader
-          cartLink={
-            <Suspense fallback={<CartLinkView count={0} />}>
-              <CartLink />
-            </Suspense>
-          }
-        />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
-      </body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
