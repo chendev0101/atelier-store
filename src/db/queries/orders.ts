@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import type Stripe from "stripe";
 import { db } from "@/db";
 import {
@@ -216,4 +216,52 @@ export async function failCheckout(session: Stripe.Checkout.Session) {
   if (order.status === "pending") {
     await db.update(orders).set({ status: "payment_failed" }).where(eq(orders.id, order.id));
   }
+}
+
+/*
+ * Customer order history. Every query is scoped by user id, so a customer
+ * can only ever read their own orders. Guest orders (no user id) aren't
+ * matched by email: emails aren't verified, so that would leak orders.
+ */
+
+/** A signed-in customer's orders, newest first. */
+export async function getCustomerOrders(userId: string) {
+  const rows = await db.query.orders.findMany({
+    columns: { id: true, status: true, totalCents: true, createdAt: true },
+    where: eq(orders.userId, userId),
+    orderBy: [desc(orders.createdAt)],
+    with: { items: { columns: { quantity: true } } },
+  });
+  return rows.map(({ items, ...order }) => ({
+    ...order,
+    itemCount: items.reduce((n, i) => n + i.quantity, 0),
+  }));
+}
+
+/** One of the customer's orders with its items, or undefined if it isn't theirs. */
+export async function getCustomerOrder(userId: string, orderId: string) {
+  if (!UUID.test(orderId)) return undefined;
+  const order = await db.query.orders.findFirst({
+    where: and(eq(orders.id, orderId), eq(orders.userId, userId)),
+    with: {
+      items: {
+        orderBy: [orderItems.createdAt, orderItems.productName],
+        // Current slug and image; the name, size and price stay as sold.
+        with: { product: { columns: { slug: true, images: true } } },
+      },
+    },
+  });
+  if (!order) return undefined;
+  return {
+    ...order,
+    items: order.items.map((item) => ({
+      slug: item.product?.slug ?? "",
+      name: item.productName,
+      size: item.productSize,
+      unitPriceCents: item.unitPriceCents,
+      quantity: item.quantity,
+      lineTotalCents: item.unitPriceCents * item.quantity,
+      image: item.product?.images[0],
+    })),
+  };
 }
