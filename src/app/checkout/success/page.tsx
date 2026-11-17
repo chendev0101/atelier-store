@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { connection } from "next/server";
 import { type ReactNode, Suspense } from "react";
 import type Stripe from "stripe";
 import { RefreshOnMount } from "@/components/checkout/refresh-on-mount";
+import { OrderLine } from "@/components/orders/order-line";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { getProductsBySlugs } from "@/db/queries/catalog";
 import {
-  type CheckoutLine,
   clearCheckedOutCart,
   getCheckoutLines,
   getOrderForCheckout,
 } from "@/db/queries/orders";
-import { formatPrice, productHref } from "@/lib/catalog";
+import { formatPrice } from "@/lib/catalog";
+import { countryName, orderNumber } from "@/lib/orders";
 import { stripe } from "@/lib/stripe";
 
 export const metadata: Metadata = { title: "Thank you", robots: { index: false } };
@@ -278,52 +277,6 @@ function MetaItem({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function OrderLine({ line, image }: { line: CheckoutLine; image?: { src: string; alt: string } }) {
-  const thumb = (
-    <span className="media-well aspect-product block w-20 shrink-0 md:w-24">
-      {image && <Image src={image.src} alt="" fill sizes="96px" className="object-cover" />}
-    </span>
-  );
-  return (
-    <li className="hairline-b flex gap-4 py-5 md:gap-6">
-      {line.slug ? (
-        <Link href={productHref(line.slug)} tabIndex={-1} aria-hidden="true">
-          {thumb}
-        </Link>
-      ) : (
-        thumb
-      )}
-      <div className="flex min-w-0 flex-1 justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-sm font-medium md:text-base">
-            {line.slug ? (
-              <Link href={productHref(line.slug)} className="link-nav">
-                {line.name}
-              </Link>
-            ) : (
-              line.name
-            )}
-          </p>
-          <p className="text-meta mt-1 text-xs">
-            {[line.size, `Qty ${line.quantity}`].filter(Boolean).join(" · ")}
-          </p>
-          {line.quantity > 1 && (
-            <p className="text-meta mt-1 text-xs">{formatPrice(line.unitPriceCents)} each</p>
-          )}
-        </div>
-        <p className="text-sm tabular-nums">{formatPrice(line.lineTotalCents)}</p>
-      </div>
-    </li>
-  );
-}
-
-/** Short, human-readable reference from the order's uuid. */
-function orderNumber(id: string) {
-  return id.replaceAll("-", "").slice(0, 8).toUpperCase();
-}
-
-const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
-
 function formatAddress(shipping: Stripe.Checkout.Session.CollectedInformation.ShippingDetails) {
   const a = shipping.address;
   const cityLine = [a.city, [a.state, a.postal_code].filter(Boolean).join(" ")]
@@ -334,7 +287,7 @@ function formatAddress(shipping: Stripe.Checkout.Session.CollectedInformation.Sh
     a.line1,
     a.line2,
     cityLine,
-    a.country ? (regionNames.of(a.country) ?? a.country) : null,
+    a.country ? countryName(a.country) : null,
   ].filter((row): row is string => Boolean(row));
 }
 
