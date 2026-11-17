@@ -7,6 +7,7 @@ const variants = {
   secondary: "btn-secondary",
   inverse: "btn-inverse",
   text: "btn-text",
+  danger: "btn-danger",
 } as const;
 
 type StyleProps = {

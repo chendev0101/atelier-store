@@ -464,6 +464,17 @@
   }
 }
 
+/* Destructive actions (archive, delete) */
+@utility btn-danger {
+  background-color: transparent;
+  border-color: var(--color-error);
+  color: var(--color-error);
+  &:hover {
+    background-color: var(--color-error);
+    color: var(--color-ink-inverse);
+  }
+}
+
 @utility btn-sm {
   min-height: 2.5rem;
   padding-inline: 1.25rem;
@@ -493,6 +504,30 @@
   position: relative;
   overflow: hidden;
   background-color: var(--color-paper-deep);
+}
+
+/* Boxed input for dense admin forms; also styles select and textarea */
+@utility field-box {
+  display: block;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+  &::placeholder {
+    color: var(--color-ink-subtle);
+  }
+  &:focus {
+    outline: none;
+    border-color: var(--color-line-strong);
+  }
+  &[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
 }
 
 /* Underlined input: bottom border only, ink on focus */
