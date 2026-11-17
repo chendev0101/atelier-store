@@ -67,3 +67,11 @@ export function fieldErrorsFrom(error: z.ZodError): FieldErrors {
   }
   return out;
 }
+
+export const categorySchema = z.object({
+  name: text(60, "Name"),
+  slug: slugSchema,
+  note: text(160, "Note"),
+  image: imageSchema,
+  contextImage: imageSchema,
+});
