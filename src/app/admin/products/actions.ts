@@ -8,25 +8,15 @@ import { db } from "@/db";
 import { inventory, inventoryAdjustments, PRODUCT_STATUSES, products } from "@/db/schema";
 import { type FormState, slugify } from "@/lib/admin-form";
 import { fieldErrorsFrom, initialStockSchema, productSchema } from "@/lib/admin-validation";
-import { AdminAuthError, assertAdmin } from "@/lib/dal";
+import { authorizeAdminWrite } from "@/lib/dal";
 import { isUniqueViolation } from "@/lib/db-errors";
 
 /*
- * Every action starts with assertAdmin(), before reading any input: Server
+ * Every action starts with authorizeAdminWrite(), before reading any input: Server
  * Actions are public endpoints, whatever page renders the form.
  */
 
-const NOT_AUTHORISED: FormState = { error: "You don't have permission to do that." };
 const SLUG_TAKEN = "Another product already uses this slug.";
-
-async function admin() {
-  try {
-    return await assertAdmin();
-  } catch (e) {
-    if (e instanceof AdminAuthError) return null;
-    throw e;
-  }
-}
 
 function echo(formData: FormData): Record<string, string> {
   const values: Record<string, string> = {};
@@ -73,8 +63,9 @@ function invalid(error: z.ZodError, formData: FormData, extra: FormState = {}): 
 }
 
 export async function createProduct(_prev: FormState, formData: FormData): Promise<FormState> {
-  const actor = await admin();
-  if (!actor) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
+  const { actor } = guard;
 
   const parsed = productSchema.safeParse(readProduct(formData));
   const stock = initialStockSchema.safeParse(formData.get("initialStock") || "0");
@@ -116,8 +107,8 @@ export async function updateProduct(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const actor = await admin();
-  if (!actor) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
   if (!z.uuid().safeParse(id).success) return { error: "Unknown product." };
 
   const parsed = productSchema.safeParse(readProduct(formData));
@@ -147,8 +138,8 @@ const statusInput = z.object({ id: z.uuid(), status: z.enum(PRODUCT_STATUSES) })
 
 /** Bound to (id, status) and used with useActionState, so it ignores the form. */
 export async function setProductStatus(id: string, status: string): Promise<FormState> {
-  const actor = await admin();
-  if (!actor) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
   const parsed = statusInput.safeParse({ id, status });
   if (!parsed.success) return { error: "Unknown product or status." };
 

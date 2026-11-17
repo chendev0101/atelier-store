@@ -2,14 +2,18 @@ import "server-only";
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { type OrderStatus, orderItems, orders, user } from "@/db/schema";
-import { assertAdmin } from "@/lib/dal";
+import { assertAdminAccess } from "@/lib/dal";
+import { maskAddress, maskEmail, maskName } from "@/lib/privacy";
 
-/* Admin order reads: uncached, read-only, and role-checked on every call. */
+/*
+ * Admin order reads: uncached, read-only, and role-checked on every call.
+ * For the read-only demo role, customer details are redacted here.
+ */
 
 export const ADMIN_ORDERS_PAGE_SIZE = 25;
 
 export async function listAdminOrders({ status, page }: { status?: OrderStatus; page: number }) {
-  await assertAdmin();
+  const viewer = await assertAdminAccess();
   const rows = await db
     .select({
       id: orders.id,
@@ -31,13 +35,15 @@ export async function listAdminOrders({ status, page }: { status?: OrderStatus; 
     .limit(ADMIN_ORDERS_PAGE_SIZE + 1)
     .offset((page - 1) * ADMIN_ORDERS_PAGE_SIZE);
   return {
-    orders: rows.slice(0, ADMIN_ORDERS_PAGE_SIZE),
+    orders: rows
+      .slice(0, ADMIN_ORDERS_PAGE_SIZE)
+      .map((o) => (viewer.readOnly ? { ...o, email: maskEmail(o.email) } : o)),
     hasNext: rows.length > ADMIN_ORDERS_PAGE_SIZE,
   };
 }
 
 export async function getAdminOrder(id: string) {
-  await assertAdmin();
+  const viewer = await assertAdminAccess();
   const order = await db.query.orders.findFirst({
     where: eq(orders.id, id),
     with: {
@@ -54,9 +60,17 @@ export async function getAdminOrder(id: string) {
         where: eq(user.id, order.userId),
       })
     : undefined;
+  const redacted = viewer.readOnly
+    ? {
+        email: maskEmail(order.email),
+        shippingName: maskName(order.shippingName) ?? null,
+        shippingAddress: order.shippingAddress && maskAddress(order.shippingAddress),
+        customer: customer && { name: maskName(customer.name) ?? "", email: maskEmail(customer.email) },
+      }
+    : { customer };
   return {
     ...order,
-    customer,
+    ...redacted,
     items: order.items.map((item) => ({
       productId: item.product?.id ?? null,
       slug: item.product?.slug ?? "",

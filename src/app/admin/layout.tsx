@@ -43,7 +43,18 @@ async function AdminShell({ children }: { children: ReactNode }) {
           </Link>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 px-5 py-8 md:px-10 md:py-10">{children}</main>
+      <main className="min-w-0 flex-1 px-5 py-8 md:px-10 md:py-10">
+        {admin.readOnly && (
+          <p
+            role="status"
+            className="mb-8 border-l-2 border-clay bg-paper-deep px-4 py-3 text-sm"
+          >
+            <strong className="font-medium">Read-only demo.</strong> Look around freely: saving is
+            disabled, and customer details are partly hidden.
+          </p>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import { mergeGuestCart } from "@/db/queries/cart-merge";
@@ -12,6 +12,19 @@ const google =
   env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
     ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
     : undefined;
+
+/** Account-changing endpoints the shared demo login may not use. */
+const DEMO_LOCKED_PATHS = new Set([
+  "/update-user",
+  "/change-email",
+  "/change-password",
+  "/delete-user",
+  "/link-social",
+  "/unlink-account",
+  "/revoke-session",
+  "/revoke-sessions",
+  "/revoke-other-sessions",
+]);
 
 /** Whether the Google button should be shown; safe to pass to client components. */
 export const googleSignInEnabled = Boolean(google);
@@ -45,6 +58,15 @@ export const auth = betterAuth({
     },
   },
   hooks: {
+    // The demo login is shared publicly, so nobody may change its password,
+    // email or name, delete it, or sign everyone else out of it.
+    before: createAuthMiddleware(async (ctx) => {
+      if (!DEMO_LOCKED_PATHS.has(ctx.path)) return;
+      const session = await getSessionFromCtx(ctx);
+      if (session?.user.role === "demo") {
+        throw new APIError("FORBIDDEN", { message: "The demo account can't be changed." });
+      }
+    }),
     // Any request that starts a session (email sign-in/up, OAuth callback)
     // folds the guest cart into the user's cart and drops the guest cookie.
     after: createAuthMiddleware(async (ctx) => {

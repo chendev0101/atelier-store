@@ -9,7 +9,8 @@ import {
   products,
   user,
 } from "@/db/schema";
-import { assertAdmin } from "@/lib/dal";
+import { assertAdminAccess } from "@/lib/dal";
+import { maskEmail } from "@/lib/privacy";
 
 /*
  * Admin catalogue reads. Uncached on purpose (live stock, drafts and
@@ -20,7 +21,7 @@ import { assertAdmin } from "@/lib/dal";
 export type AdminProductFilter = { status?: ProductStatus; categoryId?: string };
 
 export async function listAdminProducts(filter: AdminProductFilter = {}) {
-  await assertAdmin();
+  await assertAdminAccess();
   return db
     .select({
       id: products.id,
@@ -47,7 +48,7 @@ export async function listAdminProducts(filter: AdminProductFilter = {}) {
 }
 
 export async function getAdminProduct(id: string) {
-  await assertAdmin();
+  const viewer = await assertAdminAccess();
   const product = await db.query.products.findFirst({
     where: eq(products.id, id),
     with: { inventory: { columns: { quantity: true } } },
@@ -68,12 +69,19 @@ export async function getAdminProduct(id: string) {
     .where(eq(inventoryAdjustments.productId, id))
     .orderBy(desc(inventoryAdjustments.createdAt))
     .limit(10);
-  return { ...product, quantity: product.inventory?.quantity ?? 0, adjustments };
+  return {
+    ...product,
+    quantity: product.inventory?.quantity ?? 0,
+    // Who made each change is staff data; the demo role sees it redacted.
+    adjustments: viewer.readOnly
+      ? adjustments.map((a) => ({ ...a, actorEmail: a.actorEmail && maskEmail(a.actorEmail) }))
+      : adjustments,
+  };
 }
 
 /** Categories in display order, with how many products each holds. */
 export async function listAdminCategories() {
-  await assertAdmin();
+  await assertAdminAccess();
   return db
     .select({
       id: categories.id,
@@ -90,7 +98,7 @@ export async function listAdminCategories() {
 }
 
 export async function getAdminCategory(id: string) {
-  await assertAdmin();
+  await assertAdminAccess();
   const [row] = await db
     .select({
       category: categories,
@@ -105,7 +113,7 @@ export async function getAdminCategory(id: string) {
 
 /** Every product's stock, lowest first, for the inventory screen. */
 export async function listInventory() {
-  await assertAdmin();
+  await assertAdminAccess();
   return db
     .select({
       id: products.id,

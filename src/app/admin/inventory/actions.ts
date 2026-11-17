@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { inventory } from "@/db/schema";
 import type { FormState } from "@/lib/admin-form";
 import { fieldErrorsFrom, stockAdjustmentSchema } from "@/lib/admin-validation";
-import { AdminAuthError, assertAdmin } from "@/lib/dal";
+import { authorizeAdminWrite } from "@/lib/dal";
 
 /**
  * Apply a relative stock change and record it, in one statement. It only
@@ -14,13 +14,9 @@ import { AdminAuthError, assertAdmin } from "@/lib/dal";
  * order paid in the meantime is never overwritten, and never below zero.
  */
 export async function adjustStock(_prev: FormState, formData: FormData): Promise<FormState> {
-  let actor: { id: string };
-  try {
-    actor = await assertAdmin();
-  } catch (e) {
-    if (e instanceof AdminAuthError) return { error: "You don't have permission to do that." };
-    throw e;
-  }
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
+  const { actor } = guard;
 
   const parsed = stockAdjustmentSchema.safeParse({
     productId: formData.get("productId"),

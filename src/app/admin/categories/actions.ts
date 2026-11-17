@@ -8,23 +8,12 @@ import { db } from "@/db";
 import { categories, products } from "@/db/schema";
 import { type FormState, slugify } from "@/lib/admin-form";
 import { categorySchema, fieldErrorsFrom } from "@/lib/admin-validation";
-import { AdminAuthError, assertAdmin } from "@/lib/dal";
+import { authorizeAdminWrite } from "@/lib/dal";
 import { isUniqueViolation } from "@/lib/db-errors";
 
 /* Every action checks the admin role first, before reading any input. */
 
-const NOT_AUTHORISED: FormState = { error: "You don't have permission to do that." };
 const SLUG_TAKEN = "Another category already uses this slug.";
-
-async function isAdmin() {
-  try {
-    await assertAdmin();
-    return true;
-  } catch (e) {
-    if (e instanceof AdminAuthError) return false;
-    throw e;
-  }
-}
 
 function echo(formData: FormData): Record<string, string> {
   const values: Record<string, string> = {};
@@ -58,7 +47,8 @@ function formFieldErrors(error: z.ZodError) {
 }
 
 export async function createCategory(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (!(await isAdmin())) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
   const parsed = categorySchema.safeParse(readCategory(formData));
   if (!parsed.success) {
     return {
@@ -97,7 +87,8 @@ export async function updateCategory(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  if (!(await isAdmin())) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
   if (!z.uuid().safeParse(id).success) return { error: "Unknown category." };
   const parsed = categorySchema.safeParse(readCategory(formData));
   if (!parsed.success) {
@@ -132,7 +123,8 @@ const moveInput = z.object({ id: z.uuid(), direction: z.enum(["up", "down"]) });
 
 /** Swap a category with its neighbour, renumbering positions 0..n-1. */
 export async function moveCategory(id: string, direction: string): Promise<FormState> {
-  if (!(await isAdmin())) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
   const parsed = moveInput.safeParse({ id, direction });
   if (!parsed.success) return { error: "Unknown category." };
 
@@ -158,7 +150,8 @@ export async function moveCategory(id: string, direction: string): Promise<FormS
 
 /** Only empty categories can go; products must be moved first (the FK is RESTRICT). */
 export async function deleteCategory(id: string): Promise<FormState> {
-  if (!(await isAdmin())) return NOT_AUTHORISED;
+  const guard = await authorizeAdminWrite();
+  if (!guard.ok) return { error: guard.error };
   if (!z.uuid().safeParse(id).success) return { error: "Unknown category." };
 
   const deleted = await db
