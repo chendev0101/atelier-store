@@ -6,10 +6,22 @@
 
 [English](README.md)
 
+## 線上展示
+
+**[atelier-store-dusky.vercel.app](https://atelier-store-dusky.vercel.app)**
+
+| | |
+| --- | --- |
+| **後台（唯讀）** | 用 `demo@atelier.example` / `atelier-demo` 登入，再打開 [`/admin`](https://atelier-store-dusky.vercel.app/admin) |
+| **測試付款** | 卡號 `4242 4242 4242 4242`，有效期限填任何未來的日期，CVC 任意（Stripe 沙盒，不會真的扣款） |
+
+demo 帳號可以打開所有後台頁面，但任何修改都會在伺服器端被擋下，顧客資料也會部分遮罩。詳見[技術重點](#技術重點)的多層權限檢查。
+
 ![Atelier 前台首頁](docs/screenshots/home.png)
 
 ## 目錄
 
+- [線上展示](#線上展示)
 - [功能](#功能)
 - [技術選型](#技術選型)
 - [技術重點](#技術重點)
@@ -72,6 +84,7 @@ Stripe 可能重複送出同一個事件，也可能不照順序送，所以 web
 - 管理員角色存在 `user.role` 欄位，在 Better Auth 設定成 `input: false`，所以使用者無法透過註冊或更新資料的 API 把自己升級成管理員。
 - 權限檢查集中在 server-only 的資料存取層，並在三個地方檢查：每個後台頁面、每個後台 Server Action（在解析任何輸入之前），以及每個後台查詢。
 - 不是管理員的人會看到 404，不會知道後台的存在。
+- 另外有一個 `demo` 角色：可以瀏覽後台，但所有修改都會被拒絕。顧客的 email、姓名和街道地址在查詢時就會遮罩，真實資料根本不會傳到 demo 的瀏覽器。公開的 demo 帳號也不能修改自己的密碼、email 或名字。
 - 驗證方式：用一般客戶的 session 直接呼叫每一個 Server Action，全部都被拒絕，資料庫也完全沒有變動。
 
 **4. Next.js 16 Cache Components**

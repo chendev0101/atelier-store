@@ -6,10 +6,22 @@ Built with Next.js 16 (App Router, Cache Components), TypeScript, Better Auth, D
 
 [繁體中文說明](README.zh-TW.md)
 
+## Live demo
+
+**[atelier-store-dusky.vercel.app](https://atelier-store-dusky.vercel.app)**
+
+| | |
+| --- | --- |
+| **Admin (read-only)** | Sign in as `demo@atelier.example` / `atelier-demo`, then open [`/admin`](https://atelier-store-dusky.vercel.app/admin) |
+| **Test payment** | Card `4242 4242 4242 4242`, any future expiry date, any CVC (Stripe sandbox, no real charges) |
+
+The demo account can open every admin screen, but every write is refused on the server and customer details are partly hidden. See [Authorization in depth](#engineering-highlights).
+
 ![Atelier storefront home page](docs/screenshots/home.png)
 
 ## Contents
 
+- [Live demo](#live-demo)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Engineering highlights](#engineering-highlights)
@@ -72,6 +84,7 @@ Admin adjustments are relative (`+12`, `-2`), not "set to N". One statement appl
 - The admin role is a `user.role` column declared to Better Auth with `input: false`, so sign-up and update-user requests can't set it.
 - A server-only data access layer checks the role in three places: every admin page, every admin Server Action (before any input is parsed), and every admin query.
 - Non-admins get a 404, so the admin area isn't advertised.
+- A third role, `demo`, can view the back office but every write is refused. Customer emails, names and street addresses are redacted in the queries, so they never reach a demo session. The shared demo login can't change its own password, email or name.
 - This was verified by calling each Server Action directly with a customer session: every call was rejected and the database was unchanged.
 
 **4. Next.js 16 Cache Components**
