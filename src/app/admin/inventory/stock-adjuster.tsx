@@ -1,13 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { cn } from "@/lib/cn";
 import { adjustStock } from "./actions";
 
+type Reason = "restock" | "correction" | "damage";
+
+/** Reasons that make sense for a change's sign; the server enforces the same rule. */
+function allowed(reason: Reason, sign: number) {
+  if (sign < 0) return reason !== "restock";
+  if (sign > 0) return reason !== "damage";
+  return true;
+}
+
 /**
  * Relative stock change (+12 restock, -2 damaged…) with a reason. The
  * current quantity rides along so the server can refuse a stale change.
+ * The reason follows the sign: typing -2 moves it off "Restock".
  */
 export function StockAdjuster({
   productId,
@@ -23,9 +33,22 @@ export function StockAdjuster({
   const [state, action] = useActionState(adjustStock, null);
   const id = (field: string) => `${field}-${productId}`;
   const stacked = layout === "stacked";
+  const [sign, setSign] = useState(0);
+  // The admin's own pick, kept while it fits the sign; otherwise a sensible default.
+  const [picked, setPicked] = useState<Reason | null>(null);
+  const reason: Reason =
+    picked && allowed(picked, sign) ? picked : sign < 0 ? "correction" : "restock";
 
   return (
-    <form action={action} className="space-y-2">
+    <form
+      action={action}
+      // React resets the form after a successful submit; start the next one fresh.
+      onReset={() => {
+        setSign(0);
+        setPicked(null);
+      }}
+      className="space-y-2"
+    >
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="expected" value={quantity} />
       <div className={cn("flex flex-wrap items-end gap-2", stacked && "grid grid-cols-2")}>
@@ -47,6 +70,7 @@ export function StockAdjuster({
             inputMode="numeric"
             placeholder="+12 or -2"
             required
+            onChange={(e) => setSign(Math.sign(Number(e.target.value) || 0))}
             aria-invalid={state?.fieldErrors?.delta ? true : undefined}
             className={cn("field-box py-1.5 tabular-nums", stacked ? "w-full" : "w-28")}
           />
@@ -58,12 +82,17 @@ export function StockAdjuster({
           <select
             id={id("reason")}
             name="reason"
-            defaultValue="restock"
+            value={reason}
+            onChange={(e) => setPicked(e.target.value as Reason)}
             className={cn("field-box py-1.5", stacked ? "w-full" : "w-auto")}
           >
-            <option value="restock">Restock</option>
+            <option value="restock" disabled={!allowed("restock", sign)}>
+              Restock
+            </option>
             <option value="correction">Count correction</option>
-            <option value="damage">Damaged</option>
+            <option value="damage" disabled={!allowed("damage", sign)}>
+              Damaged
+            </option>
           </select>
         </div>
         <div className={cn(stacked && "col-span-2")}>
