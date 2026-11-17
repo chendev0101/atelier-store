@@ -8,25 +8,17 @@ import { cn } from "@/lib/cn";
 
 export type NavItem = { label: string; href: string };
 
-const defaultNav: NavItem[] = [
-  { label: "Skin", href: "/shop/skin" },
-  { label: "Body", href: "/shop/body" },
-  { label: "Hair", href: "/shop/hair" },
-  { label: "Fragrance", href: "/shop/fragrance" },
-  { label: "Home", href: "/shop/home" },
-  { label: "Gifts", href: "/shop/gifts" },
-];
-
 /**
  * Sticky, hairline-bordered header.
  * ≥ lg: wordmark left, category links inline, utility links right.
  * < lg: menu toggle, centered wordmark, cart; full-height drawer.
  */
 export function SiteHeader({
-  nav = defaultNav,
+  nav,
   cartLink,
 }: {
-  nav?: NavItem[];
+  /** Category links, in the order set in the admin. */
+  nav: NavItem[];
   /** Server-rendered cart link (with count), passed in from the layout. */
   cartLink: ReactNode;
 }) {
