@@ -1,5 +1,5 @@
-import { relations } from "drizzle-orm";
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { boolean, check, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 /*
  * Better Auth core tables (user, session, account, verification), matching
@@ -10,18 +10,31 @@ import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
  * No `server-only` here: drizzle-kit loads this file outside Next.js.
  */
 
-export const user = pgTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-});
+export const USER_ROLES = ["customer", "admin"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+
+export const user = pgTable(
+  "user",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    emailVerified: boolean("email_verified").default(false).notNull(),
+    image: text("image"),
+    /**
+     * Not part of Better Auth's core schema: declared in auth.ts as an
+     * additionalField with `input: false`, so clients can never set it.
+     * Admins are promoted by hand in SQL.
+     */
+    role: text("role").$type<UserRole>().notNull().default("customer"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [check("user_role_valid", sql`${t.role} in ('customer', 'admin')`)],
+);
 
 export const session = pgTable(
   "session",

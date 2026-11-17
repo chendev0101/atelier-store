@@ -10,6 +10,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth";
 
 /*
  * Catalogue tables: categories, products and per-product inventory.
@@ -18,6 +19,13 @@ import {
  */
 
 export type ImageAsset = { src: string; alt: string };
+
+/** draft: not yet on sale; archived: withdrawn. Only active products show in the store. */
+export const PRODUCT_STATUSES = ["draft", "active", "archived"] as const;
+export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
+
+export const STOCK_ADJUSTMENT_REASONS = ["initial", "restock", "correction", "damage"] as const;
+export type StockAdjustmentReason = (typeof STOCK_ADJUSTMENT_REASONS)[number];
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -65,11 +73,13 @@ export const products = pgTable(
     images: jsonb("images").$type<ImageAsset[]>().notNull().default([]),
     keyIngredients: text("key_ingredients").array().notNull().default(sql`'{}'::text[]`),
     howToUse: text("how_to_use").notNull(),
+    status: text("status").$type<ProductStatus>().notNull().default("active"),
     ...timestamps,
   },
   (t) => [
     index("products_category_id_idx").on(t.categoryId),
     check("products_price_cents_nonnegative", sql`${t.priceCents} >= 0`),
+    check("products_status_valid", sql`${t.status} in ('draft', 'active', 'archived')`),
   ],
 );
 
@@ -89,11 +99,48 @@ export const categoriesRelations = relations(categories, ({ many }) => ({
   products: many(products),
 }));
 
-export const productsRelations = relations(products, ({ one }) => ({
+export const productsRelations = relations(products, ({ one, many }) => ({
+  adjustments: many(inventoryAdjustments),
   category: one(categories, { fields: [products.categoryId], references: [categories.id] }),
   inventory: one(inventory, { fields: [products.id], references: [inventory.productId] }),
 }));
 
 export const inventoryRelations = relations(inventory, ({ one }) => ({
   product: one(products, { fields: [inventory.productId], references: [products.id] }),
+}));
+
+/**
+ * Ledger of manual stock changes made in the admin (sales are recorded on
+ * orders instead). inventory.quantity stays the live balance; each row
+ * records who changed it, by how much and why.
+ */
+export const inventoryAdjustments = pgTable(
+  "inventory_adjustments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    delta: integer("delta").notNull(),
+    reason: text("reason").$type<StockAdjustmentReason>().notNull(),
+    note: text("note"),
+    /** Balance right after this change. */
+    quantityAfter: integer("quantity_after").notNull(),
+    /** Null if the admin's account is later deleted. */
+    actorUserId: text("actor_user_id").references(() => user.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("inventory_adjustments_product_created_idx").on(t.productId, t.createdAt),
+    check(
+      "inventory_adjustments_reason_valid",
+      sql`${t.reason} in ('initial', 'restock', 'correction', 'damage')`,
+    ),
+    check("inventory_adjustments_quantity_after_nonnegative", sql`${t.quantityAfter} >= 0`),
+  ],
+);
+
+export const inventoryAdjustmentsRelations = relations(inventoryAdjustments, ({ one }) => ({
+  product: one(products, { fields: [inventoryAdjustments.productId], references: [products.id] }),
+  actor: one(user, { fields: [inventoryAdjustments.actorUserId], references: [user.id] }),
 }));

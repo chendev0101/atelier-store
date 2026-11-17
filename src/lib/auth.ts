@@ -27,6 +27,14 @@ export const auth = betterAuth({
     minPasswordLength: 8,
   },
   socialProviders: google ? { google } : {},
+  user: {
+    additionalFields: {
+      // input: false is what stops a client from promoting itself: Better
+      // Auth rejects the field on sign-up and update-user. Admins are set
+      // by hand in SQL.
+      role: { type: "string", input: false, required: false, defaultValue: "customer" },
+    },
+  },
   account: {
     accountLinking: {
       // Google verifies the email it returns, so signing in with Google links

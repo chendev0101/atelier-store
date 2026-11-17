@@ -1,4 +1,4 @@
-import type { ImageAsset } from "../schema";
+import type { ImageAsset, ProductStatus } from "../schema";
 
 /*
  * Starting catalogue, moved from the former hard-coded sample data.
@@ -27,6 +27,8 @@ export type SeedProduct = {
   size: string;
   badge?: string;
   isNew?: boolean;
+  /** Defaults to "active". */
+  status?: ProductStatus;
   images: ImageAsset[];
   keyIngredients: string[];
   howToUse: string;
