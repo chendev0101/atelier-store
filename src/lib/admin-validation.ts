@@ -75,3 +75,29 @@ export const categorySchema = z.object({
   image: imageSchema,
   contextImage: imageSchema,
 });
+
+export const stockAdjustmentSchema = z
+  .object({
+    productId: z.uuid("Unknown product."),
+    delta: z.coerce
+      .number({ error: "Enter a whole number." })
+      .int("Enter a whole number.")
+      .min(-MAX_STOCK, "That's too large.")
+      .max(MAX_STOCK, "That's too large.")
+      .refine((v) => v !== 0, "Enter a change other than 0."),
+    reason: z.enum(["restock", "correction", "damage"], { error: "Choose a reason." }),
+    note: z
+      .string()
+      .trim()
+      .max(200, "Note is too long.")
+      .transform((v) => v || null),
+    expected: z.coerce.number().int().min(0),
+  })
+  .refine((v) => v.reason !== "restock" || v.delta > 0, {
+    path: ["delta"],
+    message: "A restock adds units; use a positive number.",
+  })
+  .refine((v) => v.reason !== "damage" || v.delta < 0, {
+    path: ["delta"],
+    message: "Damaged stock removes units; use a negative number.",
+  });

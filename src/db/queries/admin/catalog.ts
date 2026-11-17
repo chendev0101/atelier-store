@@ -102,3 +102,22 @@ export async function getAdminCategory(id: string) {
     .groupBy(categories.id);
   return row ? { ...row.category, productCount: row.productCount } : undefined;
 }
+
+/** Every product's stock, lowest first, for the inventory screen. */
+export async function listInventory() {
+  await assertAdmin();
+  return db
+    .select({
+      id: products.id,
+      name: products.name,
+      size: products.size,
+      status: products.status,
+      categoryName: categories.name,
+      quantity: sql<number>`coalesce(${inventory.quantity}, 0)`.mapWith(Number),
+      updatedAt: inventory.updatedAt,
+    })
+    .from(products)
+    .innerJoin(categories, eq(categories.id, products.categoryId))
+    .leftJoin(inventory, eq(inventory.productId, products.id))
+    .orderBy(sql`coalesce(${inventory.quantity}, 0)`, asc(products.name));
+}

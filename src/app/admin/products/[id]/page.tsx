@@ -9,6 +9,7 @@ import { getAdminProduct, listAdminCategories } from "@/db/queries/admin/catalog
 import { productHref } from "@/lib/catalog";
 import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/dal";
+import { StockAdjuster } from "../../inventory/stock-adjuster";
 import { updateProduct } from "../actions";
 import { ProductForm } from "../product-form";
 import { StatusActions } from "../status-actions";
@@ -118,7 +119,7 @@ async function EditProduct({
                 Stock
               </h2>
               <Link href="/admin/inventory" className="link-nav text-xs text-ink-muted">
-                Adjust in Inventory
+                All stock
               </Link>
             </div>
             <p
@@ -130,18 +131,28 @@ async function EditProduct({
               {product.quantity}
               <span className="text-meta ml-2 font-sans text-sm">on hand</span>
             </p>
+            <div className="mt-4">
+              <StockAdjuster
+                productId={product.id}
+                productName={product.name}
+                quantity={product.quantity}
+                layout="stacked"
+              />
+            </div>
             {product.adjustments.length > 0 && (
               <>
-                <h3 className="text-meta mt-6 text-xs">Recent changes</h3>
+                <h3 className="mt-6 font-sans text-xs font-normal tracking-normal text-ink-muted">
+                  Recent changes
+                </h3>
                 <ul className="mt-2 divide-y divide-line text-xs">
                   {product.adjustments.map((a) => (
                     <li key={a.id} className="flex justify-between gap-3 py-2">
-                      <span className="min-w-0">
+                      <span className="min-w-0 break-words">
                         <span className="block">
                           {reasonLabels[a.reason] ?? a.reason}
                           {a.note && <span className="text-ink-muted"> · {a.note}</span>}
                         </span>
-                        <span className="text-meta block">
+                        <span className="block text-ink-muted">
                           {a.createdAt.toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -153,7 +164,7 @@ async function EditProduct({
                         <span className={a.delta < 0 ? "text-error" : undefined}>
                           {a.delta > 0 ? `+${a.delta}` : a.delta}
                         </span>
-                        <span className="text-meta block">→ {a.quantityAfter}</span>
+                        <span className="block text-ink-muted">→ {a.quantityAfter}</span>
                       </span>
                     </li>
                   ))}
